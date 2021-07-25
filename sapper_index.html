@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sapper</title>
+	<link rel="icon" href="./Img/bomb-icon-24.jpg">
+	<link rel="stylesheet" href="./Css/style.css">
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Russo+One&display=swap" rel="stylesheet">
+	<!-- <script src="https://kit.fontawesome.com/cfc84d67cf.js" crossorigin="anonymous"></script> -->
+</head>
+<body >
+	<div id="congratul" class="congratul"></div>
+	<div id="setCont" class="settings_container" >
+		<div class="choise_settings">
+			<div class="level" >Choise level:</div>
+			<button id="easy" onclick="choiseLevel(this)" class="active">Easy</button>
+			<button id="middle" onclick="choiseLevel(this)">Middle</button>
+			<button id="hard" onclick="choiseLevel(this)">Hard</button>
+			<div class="level">Choise screen size:</div>
+			<button id="smallScreen" onclick="choiseScrinSise(this)" class="active_Scrin">Small</button>
+			<button id="middleScreen" onclick="choiseScrinSise(this)">Middle</button>
+			<button id="largeScreen" onclick="choiseScrinSise(this)">Large</button>
+			<button id="ok" class="ok" onclick="choiseOk()">OK</button>
+			<button id="cansel" class="cansel" onclick="choiseCansel()">Cansel</button>
+		</div>
+
+	</div>
+	<div id="container" class="container" >
+		<div id="header" class="header">
+			<div id="number_bombs" class="number_bombs">0</div>
+			<div class="settings" onclick="setCont()">
+				<!-- <i class="fas fa-cog"></i> -->
+				<img src="./Img/cog.png" alt="">
+			</div>
+			<div class="icon" onclick="choiseSmile()">
+				<!-- <i class="fas fa-smile"></i> -->
+				<img src="./Img/smile-1.png" alt="">
+			</div>
+			<div id="bomb" class="bomb" onclick="changeFlag()">
+				<img id="bombs" class="main" src="./Img/bomb-icon-24.jpg" alt="">
+				<img id="flag" class="second" src="./Img/flag-icon_small.png" alt="">
+			</div>
+			<div id="timer" class="timer" </div>00:00</div>
+		</div>
+		<div id="field" class="field">
+			
+		</div>
+	</div>
+	<!-- <audio src="./Audio/00562.mp3" autoplay="autoplay"></audio> -->
+	<script> // create and fill the array with bombs and numbers
+		let arr=[];
+		let arrLenghtX = 15;
+		let arrLenghtY = 15;//15
+		let arrOpen=[];
+		let arrBombs=[];
+		let level = 0.14;
+		let amountBombs = Math.floor(arrLenghtX*arrLenghtY*level);
+		let bomb = "b";
+		let sumFlags = 0; 
+		let stop = false;
+		let pause = {pause: false, min:0, sec:0};
+		let levelName = "easy";
+		let screenSizeName = "smallScreen";
+		let koef = 1;
+		
+		function rundNumb(max){   //--------generating random numbers---------
+			return Math.floor(Math.random() * max);
+		};
+
+		function createArrEmpty(arr, arrLenX, arrLenY) {  // create an empty array
+			for (y=0; y<arrLenY; y++){
+				arr[y]=[];
+				for (x=0; x<arrLenX; x++){
+					arr[y][x]=0;
+				};
+			};
+		};
+
+		function fillArr(arr, arrLenX, arrLenY, amountBombs){  // fill the array with bombs
+			var sumBombs = 0;
+			arrBombs=[];
+			for (i=0; i<amountBombs; i++){
+				coordinateX = rundNumb(arrLenX);
+				coordinateY = rundNumb(arrLenY);
+				if (arr[coordinateY][coordinateX]==bomb) {i=i-1} 
+				else{
+					arr[coordinateY][coordinateX] = bomb;
+					sumBombs++;
+					arrBombs.push({y:coordinateY, x:coordinateX})
+				};
+			};
+		};
+	
+
+		function resultArr(arr) {  // find bombs and fill in the fields around
+			for (y=0; y<arr.length; y++){
+				for (x=0; x<arr[y].length; x++){
+					if	(arr[y][x] == bomb){
+						addNumBomb(arr, y-1, x)
+						addNumBomb(arr, y+1, x)
+						addNumBomb(arr, y, x-1)
+						addNumBomb(arr, y, x+1)
+						addNumBomb(arr, y+1, x+1)
+						addNumBomb(arr, y-1, x-1)
+						addNumBomb(arr, y-1, x+1)
+						addNumBomb(arr, y+1, x-1)
+					};
+				};
+			};	
+		};
+			
+		function addNumBomb(arr, y, x) {  // counts the number of bombs nearby to the field
+			if(x>=0 && y>=0 && x<arr[0].length && y<arr.length){
+				if (arr[y][x] != "b"){
+					arr[y][x]++;				
+				};						
+			};
+		};
+</script>
+
+<script>
+	function main() {
+		createArrEmpty(arr, arrLenghtX, arrLenghtY);
+		fillArr(arr, arrLenghtX, arrLenghtY, amountBombs);
+		resultArr(arr);
+		fillFieldBack(arr);
+		console.table(arr); // Print arr in table
+		document.getElementById("number_bombs").innerHTML = amountBombs; // counts the number of bombs
+		timer("timer", 0, 0);
+	};		
+</script>
+
+<script>			
+	function fillFieldBack(arr) {
+		let field = document.getElementById("field");			
+		let newSquare;
+		for (y=0; y<arr.length; y++){
+			for (x=0; x<arr[y].length; x++){
+				newSquare = document.createElement("div");
+				newSquare.id = "id"+y+"x"+x;						
+				field.append(newSquare);
+				document.getElementById("id"+y+"x"+x).onclick = function() {showSquare(arr, this)};
+			};
+		};
+	};
+
+	// fill the pressed field with data
+	function showSquare(arr, square) { //this
+		let idEl = square.id;
+		let y = Number(idEl.slice(2, idEl.indexOf("x")));
+		let x = Number(idEl.slice(idEl.indexOf("x")+1, idEl.length));
+		let val = arr[y][x];
+		document.getElementById("field").onclick = function() {
+			let bombs = document.getElementById("bomb");
+			if (bombs.classList.contains('flags')){
+				putFlags(arr, square);
+				// square.classList.add('flag');
+
+			} else {
+				if (val == bomb){
+					square.classList.add('boom');
+					var audio = new Audio(); // Создаём новый элемент Audio
+					audio.src = './Audio/boom.mp3'; // Указываем путь к звуку "клика"
+					audio.autoplay = true; // Автоматически запускаем
+					endGame(arr);			
+				}else{					
+				square.classList.add('open');
+				switch (val) {
+					case 0:
+						val = "";
+						arrOpen=[]; // arrOpen in first call is empty
+						openEmptyFields(arr, y, x, arrOpen);
+						break;
+					case 1:
+						square.style.color = "blue";
+						break;		
+					case 2:
+						square.style.color = "green";
+						break;		
+					case 3:
+						square.style.color = "red";							
+						break;		
+					case 4:
+						square.style.color = "navy";							
+						break;		
+					case 5:
+						square.style.color = "brown";							
+						break;		
+					case 6:
+						square.style.color = "deeppink";							
+						break;		
+					case 7:
+						square.style.color = "darkorange";							
+						break;		
+					case 8:
+						square.style.color = "cyan";							
+						break;								
+				};
+				square.innerHTML = val; 			
+			};};
+		};
+	};
+	// Put flags in square
+	function putFlags(arr, square) {
+		if (square.className != 'open'){
+			if (square.className != 'flag'){
+				sumFlags++;
+			} else {
+				sumFlags--;				
+			}
+			document.getElementById("number_bombs").innerHTML = amountBombs-sumFlags;
+			square.classList.toggle('flag');		
+			if (amountBombs == sumFlags){
+				checkWin();
+				// console.log("you win!");
+				// setTimeout(() => {
+				// document.getElementById("congratul").style.display = "block";					
+				// }, 1100);
+				// setTimeout(() => {
+				// document.getElementById("congratul").style.display = "none";					
+				// }, 4100);	
+				endGame(arr);
+			};
+		};
+	};
+
+		function checkWin(){
+			let all=0;
+			for (let i = 0; i < arrBombs.length; i++) {
+				const elemId = "id"+arrBombs[i].y+"x"+arrBombs[i].x;
+				if (document.getElementById(elemId).classList.contains("flag")==false){
+					all++;					
+				};
+			};
+			if (all==0){
+				console.log("you win!");
+				setTimeout(() => {
+					var audio = new Audio(); // Создаём новый элемент Audio
+					audio.src = './Audio/win.mp3'; // Указываем путь к звуку "клика"
+					audio.autoplay = true; // Автоматически запускаем
+					document.getElementById("congratul").style.backgroundImage = "url('./Img/youwin.png')";					
+					document.getElementById("congratul").style.display = "block";					
+				}, 1100);
+				setTimeout(() => {
+					document.getElementById("congratul").style.display = "none";					
+				}, 4100);
+			} else {
+				console.log("you lose!");
+				setTimeout(() => {
+					var audio = new Audio(); // Создаём новый элемент Audio
+					audio.src = './Audio/lose.mp3'; // Указываем путь к звуку "клика"
+					audio.autoplay = true; // Автоматически запускаем
+					document.getElementById("congratul").style.backgroundImage = "url('./Img/lose.png')";					
+					document.getElementById("congratul").style.display = "block";					
+				}, 1100);
+				setTimeout(() => {
+					document.getElementById("congratul").style.display = "none";					
+				}, 4100);
+			};	
+		};
+			
+	// Check empty fiels and open them
+	function openEmptyFields(arr, y, x, arrOpen) {
+		// arrOpen in first call is empty
+		checkEmptyFields(arr, y-1, x-1, arrOpen);
+		checkEmptyFields(arr, y-1, x, arrOpen);
+		checkEmptyFields(arr, y-1, x+1, arrOpen);
+		checkEmptyFields(arr, y, x+1, arrOpen);
+		checkEmptyFields(arr, y+1, x+1, arrOpen);
+		checkEmptyFields(arr, y+1, x, arrOpen);
+		checkEmptyFields(arr, y+1, x-1, arrOpen);
+		checkEmptyFields(arr, y, x-1, arrOpen);
+		// console.table(arrOpen);
+		for (let i = 0; i < arrOpen.length; i++) {			
+			checkEmptyFields(arr, arrOpen[i].emptyY-1, arrOpen[i].emptyX-1, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY-1, arrOpen[i].emptyX, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY-1, arrOpen[i].emptyX+1, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY, arrOpen[i].emptyX+1, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY+1, arrOpen[i].emptyX+1, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY+1, arrOpen[i].emptyX, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY+1, arrOpen[i].emptyX-1, arrOpen);
+			checkEmptyFields(arr, arrOpen[i].emptyY, arrOpen[i].emptyX-1, arrOpen);		
+		};
+	};
+	function checkEmptyFields(arr, y, x, arrOpen) {
+		if(x>=0 && y>=0 && x<arr[0].length && y<arr.length){
+			let a={emptyY: y, emptyX: x};
+			let id = "id"+y+"x"+x;
+			let el = document.getElementById(id);
+			if (el.className != 'open'){ //Если  эта ячейка закрыта. то
+				if (arr[y][x] == 0){
+					arrOpen.push(a);
+					el.classList.add('open');
+				}								
+				else{
+					el.classList.add('open');
+					let val = arr[y][x];
+					switch (val) {
+						case 1:
+							el.style.color = "blue";
+							break;		
+						case 2:
+							el.style.color = "green";
+							break;		
+						case 3:
+							el.style.color = "red";							
+							break;		
+						case 4:
+							el.style.color = "navy";							
+							break;		
+						case 5:
+							el.style.color = "brown";							
+							break;		
+						case 6:
+							el.style.color = "deeppink";							
+							break;		
+						case 7:
+							el.style.color = "darkorange";							
+							break;		
+						case 8:
+							el.style.color = "cyan";							
+							break;								
+					}
+					el.innerHTML = val; 			
+				};								
+			};
+		};	
+	};			
+
+	function changeFlag() {
+		let bomb = document.getElementById("bomb");
+		bomb.classList.toggle('flags');	
+	};
+
+	function timer(id, min, sec) {
+			setTimeout(()=>{
+			sec++;
+			if (sec>59){
+				min++;
+				if (sec = 60){sec = 0} else {sec = sec-60*min};
+			}
+			let mm;
+			let ss;
+			if (min<10){mm = "0"+min} else {mm = min};
+			if (sec<10){ss = "0"+sec} else {ss = sec};
+			document.getElementById(id).innerHTML = mm+":"+ss;
+			if (stop){return} 
+			else if (pause.pause){
+					pause.min = min; 
+					pause.sec = sec;
+					return;
+				} else{
+					timer(id, min, sec);
+			};
+		},1000);			
+	};
+	
+	document.getElementById("timer").onclick = function() {
+		if (pause.pause == true){
+			pause.pause = false;
+			timer("timer", pause.min, pause.sec);
+		} else{
+			pause.pause = true;
+		};
+	};
+
+	function endGame(arr) {
+		for (let i = 0; i < arrBombs.length; i++) {
+			const elY = arrBombs[i].y;
+			const elX = arrBombs[i].x;
+			const square = document.getElementById("id"+elY+"x"+elX);
+			
+			if (square.classList.contains("boom")){
+				setTimeout(() => {
+					square.style.backgroundImage = "url('./Img/bomb-icon-24.jpg')";
+					square.style.backgroundSize = "cover";
+					square.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
+
+				},1500);					
+			} else{
+					setTimeout(() => {
+						square.style.backgroundImage = "url('./Img/bomb-icon-24.jpg')";
+						square.style.backgroundSize = "cover";
+					}, 50*i*koef);
+					stop = true;
+		};
+		};	
+	};
+
+	function choiseLevel(el) {
+		if (levelName!= el.id){
+			// console.log(levelName);
+			document.getElementById(levelName).classList.remove("active");
+			el.classList.toggle("active");
+			levelName = el.id;
+			// console.log(levelName);
+			switch (levelName) {
+				case "easy":
+					level = 0.14;					
+					amountBombs = Math.floor(arrLenghtX*arrLenghtY*level);
+					break;
+				case "middle":
+					level = 0.18;
+					amountBombs = Math.floor(arrLenghtX*arrLenghtY*level);
+					break;				
+				case "hard":
+					level = 0.225;
+					amountBombs = Math.floor(arrLenghtX*arrLenghtY*level);
+					break;										
+			};
+		};				
+	};
+
+	function choiseOk() {
+		deleteSquares(arr);
+		stop = false;
+		pause.pause=false;
+		sumFlags = 0;
+		arrOpen=[];
+		arrBombs=[];
+		document.getElementById("timer").innerHTML = "00:00";
+		main();
+		document.getElementById("setCont").style.display = "none";
+	};
+
+	function setCont() {
+		pause.pause = true;
+		document.getElementById("setCont").style.display = "flex";
+	};
+
+	function deleteSquares(arr){
+		if (arr != undefined){
+			for (y=0; y<arr.length; y++){
+				for (x=0; x<arr[y].length; x++){
+					var el = document.getElementById("id"+y+"x"+x);
+					el.remove();
+				};
+			};
+		};
+	};
+
+	function choiseScrinSise(el) {
+		if (screenSizeName!= el.id){
+			deleteSquares(arr);
+			arr = [];
+			document.getElementById(screenSizeName).classList.remove("active_Scrin");
+			el.classList.toggle("active_Scrin");
+			screenSizeName = el.id;
+			let container = document.getElementById("container");
+			let header = document.getElementById("header").clientHeight; // get Hight elem
+			let fullScrW = document.body.clientWidth;
+			let fullScrH = document.body.clientHeight;
+			let wid = Math.floor( fullScrW/30 )*30;
+			let hei = Math.floor( fullScrH/30 )*30;
+			console.log(wid);
+			console.log(hei);
+			switch (screenSizeName) {
+				case "smallScreen":
+					if (wid > 450 + 4 +30){	wid =  450 + 4;}; // 4px - shadow
+					container.style.width = wid + "px";
+					arrLenghtX = (wid-4)/30;
+					console.log("arrLenghtX="+arrLenghtX);
+					if (hei > 450+header+4+30){hei=450+(header+1)+4}; // 4px - shadow
+					container.style.height = hei + "px";
+					arrLenghtY = Math.floor((hei - (header+1) - 4)/30);					
+					console.log("arrLenghtY="+arrLenghtY);
+					koef = 1;
+					break;
+
+				case "middleScreen":
+					if (wid > 810 + 4 +30){	
+						wid = 810 + 4; // 4px - shadow
+					}; 
+					arrLenghtX = Math.floor((wid-4)/30);
+					console.log("arrLenghtX="+arrLenghtX);
+					container.style.width = (arrLenghtX*30+4) + "px";
+					if (hei > 780+header+4+30+1){hei=780+header+4+1;}; // 4px - shadow
+					arrLenghtY = Math.floor((hei - (header+1) - 4)/30);		
+					container.style.height = (arrLenghtY*30+(header+1)+4) + "px";
+					console.log("arrLenghtY="+arrLenghtY);
+					koef = 0.5;
+					break;	
+
+				case "largeScreen":
+					arrLenghtX = Math.floor((wid-4)/30);
+					container.style.width = (arrLenghtX*30+4) + "px";
+					console.log("arrLenghtX="+arrLenghtX);
+					arrLenghtY = Math.floor((hei - (header+1) - 4)/30);								
+					container.style.height = (arrLenghtY*30+(header+1)+4) + "px";
+					console.log("arrLenghtY="+arrLenghtY);
+					koef = 0.1;
+					break;										
+			};
+		};			
+		amountBombs = Math.floor(arrLenghtX*arrLenghtY*level);
+	};
+
+	function choiseCansel() {
+		pause.pause = false;
+		document.getElementById("setCont").style.display = "none";
+		timer("timer", pause.min, pause.sec)
+	};	
+
+	function choiseSmile() {
+		endGame(arr);
+		sumFlags = 0;
+		arrOpen=[];
+		arrBombs=[];
+		amountBombs = Math.floor(arrLenghtX*arrLenghtY*level);
+		setTimeout(() => {
+			choiseOk();}, 1100);
+		}
+	</script>
+</body>
+</html>

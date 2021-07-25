@@ -1,0 +1,237 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+body {
+	background-color: burlywood;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-image: url("../Img/mines.jpg");
+	background-repeat: no-repeat;
+	background-size: cover; 
+	background-position: center;
+}
+.container {
+	width: 454px;
+	height: 504px;/* 20squares*30px hight+50px header + 4px border */
+	background-color: silver;
+	border: 2px solid rgb(134, 134, 134);
+	box-shadow: 3px 3px 3px rgb(43, 43, 43, 0.7),
+    -2px -2px 2px rgba(255, 255, 255, 0.7);
+}
+.header {
+	width: 100%;
+	height: 50px;
+	border-bottom: 1px solid black;
+	display: flex;
+	justify-content: space-between;
+	box-shadow: inset -2px -2px 2px rgb(43, 43, 43, 0.5),
+		inset 3px 3px 2px rgba(255, 255, 255, 0.7);
+}
+
+.number_bombs,
+.timer {
+	width: 100px;
+	height: 100%;
+	background-color: rgb(122, 8, 8);
+	font-family: "Orbitron", sans-serif;
+	font-size: 24px;
+	font-weight: 700;
+	padding: 4px;
+	color: yellow;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	box-shadow: inset -2px -2px 2px rgb(43, 43, 43, 0.5),
+		inset 3px 3px 2px rgba(255, 255, 255, 0.7);
+}
+
+.settings,
+.icon {
+	width: 60px;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.settings img {
+	width: 40px;
+	cursor: pointer;
+}
+
+.icon img {
+	width: 40px;
+	box-shadow: rgb(161, 111, 111) 0 0px 5px;
+	border: grey 1px solid;  
+	border-radius: 50%;
+	cursor: pointer;
+}
+.bomb {
+	position: relative;
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 46px;
+	/* background-color: #fff; */
+	z-index: 10;
+
+}
+
+.bomb .main {
+	position: absolute;
+	left: 0;
+	bottom: 4px;
+	height: 85%;
+	z-index: 4;	
+}
+.bomb .second {
+	position: absolute;
+	height: 30%;
+	right: 0;
+	bottom: 5px;
+	z-index: 5;
+}
+.flags .main {
+	position: absolute;
+	height: 35%;
+	left: 32px;
+	bottom: 4px;
+	z-index: 5;
+	
+ }
+.flags .second {
+	position: absolute;
+	right: 8px;
+	bottom: 5px;
+	height: 85%;
+	z-index: 4;	
+}
+ 
+.field {
+	display: flex;
+	flex-wrap: wrap;
+}
+.field div {
+	padding: 0;
+	margin: 0;
+	width: 30px;
+	height: 30px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 22px;
+	font-family: 'Russo One', sans-serif;
+	cursor: pointer;
+	box-shadow: inset -2px -2px 2px rgb(43, 43, 43, 0.5),
+		inset 2px 2px 2px rgba(255, 255, 255, 0.7);
+}
+.field .open {
+	box-shadow: none;
+	background-color: rgb(226, 225, 225);
+	border: rgb(153, 153, 153) 1px solid;
+}
+.field .flag {
+	
+	background-image: url("../Img/flag-icon_small.png");
+	background-repeat: no-repeat;
+	background-size: 60%; 
+	background-position: center;
+	/* background-color: rgba(255, 0, 0, 0.507); */
+}
+.field .boom {
+	background-image: url("../Img/boom.png");
+	background-repeat: no-repeat;
+	background-size: 100%; 
+	background-position: center;
+}
+/* Settings */
+.settings_container{
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(68, 7, 7, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 20;
+	/* display: none; */
+}
+.choise_settings{
+	width: 400px;
+	height: 640px;
+	background-color: rgb(1, 104, 1);
+	border-radius: 16px;
+	border: black 4px solid;
+}
+.choise_settings .level{
+	text-align: center;
+	font-size: 30px;
+	color: yellow;
+	margin: 16px;
+}
+.choise_settings button{
+	width: 60%;
+	margin: 8px 20%;
+	padding: 5px;
+	border-radius: 10px;
+	color: yellow;
+	font-size: 20px;
+	background-color: rgb(122, 8, 8);
+	cursor: pointer;
+	box-shadow: 4px 8px 4px black;
+	text-align: center;
+
+}
+.choise_settings .active, 
+.choise_settings .active_Scrin, 
+.ok:hover, .cansel:hover{
+	transform: translateY(4px);
+	transform: translateX(2px);
+	background-color: rgb(230, 19, 19);
+	box-shadow: 1px 2px 1px black;
+}
+#ok {
+	margin: 32px 20%;
+	padding: 10px;
+	background-color: rgb(255, 188, 4);
+	color: rgb(107, 48, 6);
+	font-weight: 600;
+	font-size: 26px;
+}
+
+#cansel {
+	margin: 0px 25% 20px;
+	padding: 6px;
+	background-color: rgb(149, 201, 89);
+	color: rgb(107, 48, 6);
+	font-weight: 600;
+	font-size: 22px;
+	width: 50%;
+}
+.congratul {
+	width: 100vh;
+	height: 100vh;
+	background-image: url("../Img/youwin.png");
+	background-repeat: no-repeat;
+	background-size: 100%; 
+	background-position: center;
+	display: none;	
+	position: fixed;
+	animation: 3s congratulations;
+	left: 25%;top: 0;
+	z-index: 100;
+}
+	@keyframes congratulations {
+	0% {transform: scale(0);}
+	50% {transform: scale(1);
+		display: block;}
+	90% {transform: scale(1);}
+	100% {transform: scale(0);}
+	
+	}
